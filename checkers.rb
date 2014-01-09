@@ -82,6 +82,7 @@ class Piece
 
   def perform_moves(move_seq)
     raise InvalidMoveError unless valid_move_seq?(move_seq)
+
     perform_moves!(move_seq)
   end
 
@@ -106,7 +107,6 @@ class Piece
   end
 
   def perform_slide(square)
-
     return false unless can_move?(square) && adjacent_to?(square)
 
     move_to(square)
@@ -116,6 +116,7 @@ class Piece
   end
 
   def perform_jump(square)
+
     adjacent_square = [@position[0] + move_diff(square)[0]/2,
                        @position[1] + move_diff(square)[1]/2]
     other_piece = @board[adjacent_square]
