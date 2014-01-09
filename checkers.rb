@@ -1,5 +1,55 @@
 class InvalidMoveError < StandardError
 end
+BOARD_SIZE = 8
+class Game
+  def self.construct_game
+    game = Game.new
+    game.play
+  end
+
+  def initialize
+    @board = Board.new
+  end
+
+  def play
+    turn = :white
+    puts "Enter moves of the form A1:B2"
+    loop do
+      render
+
+      puts "#{turn.to_s}'s turn: "
+      input = get_input(gets.chomp.downcase)
+
+      if @board.find_piece(input.first).color != turn
+        raise InvalidMoveError.new("wrong piece")
+      end
+
+      @board.perform_moves(input)
+    end
+  end
+
+  # broken
+  def get_input(input)
+    input = input.split(":")
+    move_from, move_to = [], []
+
+    p first_part = input.first.split("")
+    p second_part = input.last.split("")
+
+    move_from[1] = first_part[0].ord - "a".ord
+    move_from[0] = BOARD_SIZE - first_part[1].to_i
+
+    move_to[1] = second_part[0].ord - "a".ord
+    move_to[0] = BOARD_SIZE - second_part[0].to_i
+
+    p [move_from, move_to]
+  end
+
+  def render
+    print @board.draw + "\n"
+  end
+end
+
 
 class Board
   BOARD_SIZE = 8
@@ -31,7 +81,7 @@ class Board
       end.join(" ")
     end.join("\n")
 
-    print draw_grid
+    draw_grid
   end
 
   def find_piece(pos)
@@ -69,8 +119,7 @@ class Board
 end
 
 class Piece
-  attr_accessor :board, :position
-  attr_reader :color, :token
+  attr_accessor :board, :position, :color, :token
 
   def initialize(initial_position, color, board)
     @position, @color, @board = initial_position, color, board
