@@ -81,7 +81,7 @@ class Piece
   end
 
   def perform_moves(move_seq)
-    raise InvalidMoveError.new("#{move_seq}") unless valid_move_seq?(move_seq)
+    raise InvalidMoveError unless valid_move_seq?(move_seq)
     perform_moves!(move_seq)
   end
 
@@ -92,7 +92,7 @@ class Piece
 
     begin
       new_piece.perform_moves!(move_seq)
-    rescue InvalidMoveError => e
+    rescue InvalidMoveError
       false
     else
       true
@@ -101,39 +101,28 @@ class Piece
 
   def perform_moves!(move_seq)
     move_seq.each do |move|
-      unless perform_slide(move) || perform_jump(move)
-        raise InvalidMoveError
-      end
+      raise InvalidMoveError unless perform_slide(move) || perform_jump(move)
     end
   end
 
   def perform_slide(square)
 
-    return false unless @board[square].nil?
-    return false unless moves_forward_to?(square) || king?
-    return false unless adjacent_to?(square)
+    return false unless can_move?(square) && adjacent_to?(square)
 
-    @board[square] = self
-    @board[@position] = nil
-    @position = square
+    move_to(square)
     promote if reached_opposite_side?
 
     true
   end
 
   def perform_jump(square)
-    diff = [@position[0] + move_diff(square)[0]/2,
-            @position[1] + move_diff(square)[1]/2]
-    other_piece = @board[diff]
+    adjacent_square = [@position[0] + move_diff(square)[0]/2,
+                       @position[1] + move_diff(square)[1]/2]
+    other_piece = @board[adjacent_square]
 
-    return false unless @board[square].nil?
-    return false unless jumps_over?(other_piece)
-    return false unless moves_forward_to?(square) || king?
+    return false unless can_move?(square) && jumps_over?(other_piece)
 
-    @board[square] = self
-    @board[@position] = nil
-    @position = square
-
+    move_to(square)
     promote if reached_opposite_side?
 
     true
@@ -143,6 +132,16 @@ class Piece
 
     def promote
       @state = :king
+    end
+
+    def move_to(square)
+      @board[square] = self
+      @board[@position] = nil
+      @position = square
+    end
+
+    def can_move?(square)
+      @board[square].nil? && (moves_forward_to?(square) || king?)
     end
 
     def king?
