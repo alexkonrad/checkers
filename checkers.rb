@@ -1,5 +1,5 @@
 class Piece
-  attr_accessor :position, :state, :last_row
+  attr_accessor :position
 
   def initialize(initial_position, last_row)
     @state = :pawn
@@ -25,7 +25,7 @@ class Piece
   def perform_jump
   end
 
-  #private
+  private
 
     def promote
       @state = :king
