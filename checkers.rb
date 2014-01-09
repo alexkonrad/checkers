@@ -1,3 +1,5 @@
+class InvalidMoveError < StandardError
+
 class Piece
   attr_reader :position, :color
 
@@ -6,6 +8,28 @@ class Piece
 
     @last_row = color == :white ? 7 : 0
     @state = :pawn
+  end
+
+  def valid_move_seq?(move_seq)
+    new_board = @board.dup
+    new_piece = self.dup
+    new_piece.board = new_board
+
+    begin
+      new_piece.perform_moves!(move_seq)
+    rescue InvalidMoveError
+      return false
+    end
+
+    true
+  end
+
+  def perform_moves!(move_seq)
+    move_seq.each do |move|
+      unless perform_slide(move) || perform_jump(move)
+        raise InvalidMoveError.new "#{move}"
+      end
+    end
   end
 
   def perform_slide(square)
@@ -19,24 +43,25 @@ class Piece
     true
   end
 
-  def perform_jump(other_piece)
+  def perform_jump(square)
+    other_piece = @board[move_diff(square) / 2]
 
     return false unless jumps_over?(other_piece)
-    return false unless moves_forward_to?(other_piece.position) || king?
+    return false unless moves_forward_to?(square) || king?
 
-    jump_over(other_piece)
+    jump_to(square)
     promote if reached_opposite_side?
 
-    nil
+    true
   end
 
   private
 
-    def jump_over(other_piece)
-      diff = move_diff(other_piece.position)
+    def jump_to(square)
+      diff = move_diff(square)
 
-      @position[0] = other_piece.position[0] + diff[0]
-      @position[1] = other_piece.position[1] + diff[1]
+      @position[0] += diff[0]
+      @position[1] += diff[1]
     end
 
     def promote
