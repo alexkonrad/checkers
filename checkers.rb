@@ -1,7 +1,11 @@
 class InvalidMoveError < StandardError
+end
+
+class Board
+end
 
 class Piece
-  attr_reader :position, :color
+  attr_reader :position, :color, :board
 
   def initialize(initial_position, color)
     @position, @color = initial_position, color
@@ -18,16 +22,16 @@ class Piece
     begin
       new_piece.perform_moves!(move_seq)
     rescue InvalidMoveError
-      return false
+      false
+    else
+      true
     end
-
-    true
   end
 
   def perform_moves!(move_seq)
     move_seq.each do |move|
       unless perform_slide(move) || perform_jump(move)
-        raise InvalidMoveError.new "#{move}"
+        raise InvalidMoveError
       end
     end
   end
