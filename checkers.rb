@@ -1,6 +1,8 @@
 class InvalidMoveError < StandardError
 end
 
+# REV: Looks good dude! Maybe I'm reading this code easily since we worked together?
+
 class Board
   BOARD_SIZE = 8
   WHITE_POSITIONS = [
@@ -15,6 +17,7 @@ class Board
   ]
 
   def initialize(pieces = true)
+    # REV: Just use BOARD_SIZE here?
     @grid = Array.new(8) { Array.new(8, nil) }
 
     if pieces
@@ -63,6 +66,7 @@ class Board
     @grid[i][j] = k
   end
 
+  # REV: adding in a Canadian checkers feature?
   def size
     BOARD_SIZE
   end
